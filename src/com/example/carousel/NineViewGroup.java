@@ -57,6 +57,8 @@ public class NineViewGroup extends ViewGroup {
         boolean onEndLongpress();
 
         boolean onCancelLongpress(int reason);
+
+        void notifyTouch(double x, double y);
     }
 
     public interface LayoutCompleteListener {
@@ -344,6 +346,11 @@ public class NineViewGroup extends ViewGroup {
         @Override
         public boolean abort(View v, int reason) {
             return handleAbort(v, reason);
+        }
+
+        @Override
+        public void notifyTouch(double x, double y) {
+            gestureCallbacks.notifyTouch(x, y);
         }
     }
 

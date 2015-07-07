@@ -8,6 +8,7 @@ import android.widget.Toast;
 public class MyActivity extends Activity {
 
     NineViewGroup nvGroup;
+    DebugView debugView;
     /**
      * Called when the activity is first created.
      */
@@ -16,6 +17,8 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         nvGroup = (NineViewGroup) findViewById(R.id.group);
+        debugView = (DebugView) findViewById(R.id.debug_view);
+        debugView.setNineViewGroup(nvGroup);
         nvGroup.setGestureListener(new NineViewGroup.GestureCallbacks() {
             @Override
             public boolean onSurroundingClick(View view, int position) {
@@ -42,6 +45,11 @@ public class MyActivity extends Activity {
             }
 
             @Override
+            public void notifyTouch(double x, double y) {
+                debugView.postInvalidate();
+            }
+
+            @Override
             public boolean onCenterClick(View view) {
                 showToast("onCenterClick");
                 return true;
@@ -56,6 +64,6 @@ public class MyActivity extends Activity {
     }
 
     private void showToast(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
 }

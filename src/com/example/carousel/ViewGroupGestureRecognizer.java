@@ -24,6 +24,8 @@ public abstract class ViewGroupGestureRecognizer {
 
     public abstract boolean abort(View v, int reason);
 
+    public abstract void notifyTouch(double x, double y);
+
     // ---------
     // Constants
     // ---------
@@ -95,10 +97,7 @@ public abstract class ViewGroupGestureRecognizer {
             intercept = false;
         handleTouchEvent(ev);
         if (state == State.IDLE) {
-            if (targetView != null) {
-                targetView.setTranslationX(0);
-                targetView.setTranslationY(0);
-            }
+            testChangePos(0, 0);
         }
         if (state == State.IDLE && longPressTask != null) {
             longPressTask.cancel();
@@ -248,8 +247,7 @@ public abstract class ViewGroupGestureRecognizer {
                     // Happens when the backing window view gets the down event. Just ignore.
                     return;
                 case MotionEvent.ACTION_MOVE:
-                    targetView.setTranslationX((float) (event.getRawX() - downPosition[0]));
-                    targetView.setTranslationY((float) (event.getRawY() - downPosition[1]));
+                    testChangePos(event.getRawX() - downPosition[0], event.getRawY() - downPosition[1]);
                     return;
                 case MotionEvent.ACTION_CANCEL:
                     state = State.IDLE;
@@ -396,4 +394,11 @@ public abstract class ViewGroupGestureRecognizer {
         return null;
     }
 
+    private void testChangePos(double x, double y) {
+        for (View view : targetViews) {
+            view.setTranslationX(0);
+            view.setTranslationY((float) y);
+        }
+        notifyTouch(x, y);
+    }
 }
