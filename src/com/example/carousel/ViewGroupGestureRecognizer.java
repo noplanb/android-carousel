@@ -47,12 +47,12 @@ public abstract class ViewGroupGestureRecognizer {
     private Activity activity;
     private ViewGroup viewGroup;
     private ArrayList<View> targetViews = new ArrayList<View>();
-    private Integer state = State.IDLE;
+    private int state = State.IDLE;
     private View targetView;
-    private Double[] downPosition = new Double[2];
-    private Boolean enabled = false;
-    private Boolean intercept = false;
-    private Boolean cancelOnMultiTouch = false;
+    private double[] downPosition = new double[2];
+    private boolean enabled = false;
+    private boolean intercept = false;
+    private boolean cancelOnMultiTouch = false;
     private CancelableTask longPressTask;
 
     // -------------------
@@ -248,10 +248,8 @@ public abstract class ViewGroupGestureRecognizer {
                     // Happens when the backing window view gets the down event. Just ignore.
                     return;
                 case MotionEvent.ACTION_MOVE:
-                    if (isMoving(event)) {
-                        targetView.setTranslationX((float) (event.getRawX() - downPosition[0]));
-                        targetView.setTranslationY((float) (event.getRawY() - downPosition[1]));
-                    }
+                    targetView.setTranslationX((float) (event.getRawX() - downPosition[0]));
+                    targetView.setTranslationY((float) (event.getRawY() - downPosition[1]));
                     return;
                 case MotionEvent.ACTION_CANCEL:
                     state = State.IDLE;

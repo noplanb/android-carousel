@@ -355,10 +355,9 @@ public class NineViewGroup extends ViewGroup {
 
     @SuppressWarnings("ResourceType")
     private void setupTestView(FrameLayout fl) {
+        fl.setBackgroundResource(R.drawable.box_background);
         if (isCenterView(fl)) {
-            fl.setBackgroundColor(Color.parseColor("#9E000D"));
-        } else {
-            fl.setBackgroundColor(Color.parseColor("#5276C4"));
+            fl.setSelected(true);
         }
         TextView tv = new TextView(getContext());
         FrameLayout.LayoutParams p = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER);
