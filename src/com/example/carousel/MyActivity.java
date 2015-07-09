@@ -45,7 +45,7 @@ public class MyActivity extends Activity {
             }
 
             @Override
-            public void notifyTouch(double x, double y) {
+            public void notifyUpdateDebug() {
                 debugView.postInvalidate();
             }
 
@@ -61,6 +61,7 @@ public class MyActivity extends Activity {
                 return true;
             }
         });
+        nvGroup.setSpinStrategy(new OvalSpin(nvGroup));
     }
 
     private void showToast(String text) {

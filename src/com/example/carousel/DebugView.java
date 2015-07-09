@@ -15,8 +15,12 @@ public class DebugView extends View {
     private NineViewGroup nvGroup;
     private RectF ovalRect = new RectF();
     private Paint ovalPaint = new Paint();
+    private Paint pointPaint = new Paint();
     {
         ovalPaint.setColor(Color.GREEN);
+        pointPaint.setColor(Color.RED);
+        pointPaint.setStyle(Paint.Style.FILL);
+        pointPaint.setTextSize(50);
     }
     public DebugView(Context context) {
         super(context);
@@ -46,6 +50,7 @@ public class DebugView extends View {
                     v.getTop() + v.getHeight()/2 + v.getTranslationY(),
                     7, ovalPaint);
         }
+        canvas.drawText("" + nvGroup.getSpinStrategy().getAngle(), 5, 50, pointPaint);
     }
 
     public void setNineViewGroup(NineViewGroup group) {

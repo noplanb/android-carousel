@@ -42,6 +42,7 @@ public class NineViewGroup extends ViewGroup {
     // Abstract callback interfaces
     //-----------------------------
     private GestureCallbacks gestureCallbacks;
+    private SpinStrategy spinStrategy;
     private ViewGroupGestureRecognizer vgGestureRecognizer;
     private LayoutCompleteListener layoutCompleteListener;
 
@@ -58,13 +59,42 @@ public class NineViewGroup extends ViewGroup {
 
         boolean onCancelLongpress(int reason);
 
-        void notifyTouch(double x, double y);
+        void notifyUpdateDebug();
     }
 
     public interface LayoutCompleteListener {
         void onLayoutComplete();
     }
 
+    public enum Box {
+        TOP_LEFT(7),
+        TOP_CENTER(6),
+        TOP_RIGHT(4),
+        CENTER_LEFT(5),
+        CENTER(8),
+        CENTER_RIGHT(0),
+        BOTTOM_LEFT(3),
+        BOTTOM_CENTER(1),
+        BOTTOM_RIGHT(2);
+
+        private int pos;
+        Box(int i) {
+            pos = i;
+        }
+
+        int getPos() {
+            return pos;
+        }
+
+        public static Box getBox(int position) {
+            for (Box box : values()) {
+                if (box.pos == position) {
+                    return box;
+                }
+            }
+            return null;
+        }
+    }
     //-------------
     // Constructors
     //-------------
@@ -106,6 +136,14 @@ public class NineViewGroup extends ViewGroup {
 
     public void setGestureListener(GestureCallbacks gl) {
         this.gestureCallbacks = gl;
+    }
+
+    public SpinStrategy getSpinStrategy() {
+        return spinStrategy;
+    }
+
+    public void setSpinStrategy(SpinStrategy spinStrategy) {
+        this.spinStrategy = spinStrategy;
     }
 
     public void setChildLayoutCompleteListener(LayoutCompleteListener childLayoutCompleteListener) {
@@ -223,6 +261,14 @@ public class NineViewGroup extends ViewGroup {
         return (FrameLayout) getChildAt(indexWithPosition(position));
     }
 
+    public FrameLayout getFrame(Box box) {
+        return (FrameLayout) getChildAt(indexWithPosition(box.getPos()));
+    }
+
+    public Box getBox(View view) {
+        return Box.getBox(positionWithIndex(view.getId()));
+    }
+
     private int indexWithPosition(int position) {
         switch (position) {
             case 0: return 5;
@@ -268,7 +314,7 @@ public class NineViewGroup extends ViewGroup {
 
     @SuppressWarnings("ResourceType")
     private boolean isCenterView(View v) {
-        return v.getId() == 4;
+        return v != null && v.getId() == 4;
     }
 
     private int positionOfView(View v) {
@@ -349,8 +395,13 @@ public class NineViewGroup extends ViewGroup {
         }
 
         @Override
-        public void notifyTouch(double x, double y) {
-            gestureCallbacks.notifyTouch(x, y);
+        public void notifyMove(View target, double startX, double startY, double offsetX, double offsetY) {
+            if (spinStrategy != null && !isCenterView(target)) {
+                spinStrategy.spin(target, startX, startY, offsetX, offsetY);
+            }
+            if (gestureCallbacks != null) {
+                gestureCallbacks.notifyUpdateDebug();
+            }
         }
     }
 
@@ -373,5 +424,20 @@ public class NineViewGroup extends ViewGroup {
         tv.setTextSize(26f);
         tv.setText(String.valueOf(fl.getId()));
         fl.addView(tv);
+    }
+
+    public static abstract class SpinStrategy {
+        private NineViewGroup viewGroup;
+        public SpinStrategy(NineViewGroup viewGroup) {
+            this.viewGroup = viewGroup;
+        }
+
+        protected NineViewGroup getViewGroup() {
+            return viewGroup;
+        }
+
+        abstract public double getAngle();
+        abstract protected float[] calculate(Box box, double distance);
+        abstract protected void spin(View target, double startX, double startY, double offsetX, double offsetY);
     }
 }

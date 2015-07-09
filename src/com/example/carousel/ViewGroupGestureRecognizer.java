@@ -24,14 +24,13 @@ public abstract class ViewGroupGestureRecognizer {
 
     public abstract boolean abort(View v, int reason);
 
-    public abstract void notifyTouch(double x, double y);
+    public abstract void notifyMove(View target, double startX, double startY, double offsetX, double offsetY);
 
     // ---------
     // Constants
     // ---------
     private final String TAG = ViewGroupGestureRecognizer.class.getSimpleName();
     private static final Integer LONGPRESS_TIME = 500;
-    private static final int BIG_MOVE_DISTANCE = 200;
 
     // -----
     // State
@@ -151,9 +150,9 @@ public abstract class ViewGroupGestureRecognizer {
                     int x = (int) event.getX();
                     int y = (int) event.getY();
                     targetView = pointToTargetView(x, y);
+                    state = State.DOWN;
+                    setDownPosition(event);
                     if (targetView != null) {
-                        state = State.DOWN;
-                        setDownPosition(event);
                         startLongpressTimer();
                     }
                     return;
@@ -182,9 +181,10 @@ public abstract class ViewGroupGestureRecognizer {
                     return;
                 case MotionEvent.ACTION_MOVE:
                     if (isMoving(event)) {
-                        targetView.setTranslationX((float) (event.getRawX() - downPosition[0]));
-                        targetView.setTranslationY((float) (event.getRawY() - downPosition[1]));
-                        longPressTask.cancel();
+                        testChangePos(event.getX() - downPosition[0], event.getY() - downPosition[1]);
+                        if (longPressTask != null) {
+                            longPressTask.cancel();
+                        }
                         state = State.SLIDING;
                     }
                     return;
@@ -193,7 +193,9 @@ public abstract class ViewGroupGestureRecognizer {
                     return;
                 case MotionEvent.ACTION_UP:
                     state = State.IDLE;
-                    runClick(targetView);
+                    if (targetView != null) {
+                        runClick(targetView);
+                    }
                     return;
             }
 
@@ -247,7 +249,7 @@ public abstract class ViewGroupGestureRecognizer {
                     // Happens when the backing window view gets the down event. Just ignore.
                     return;
                 case MotionEvent.ACTION_MOVE:
-                    testChangePos(event.getRawX() - downPosition[0], event.getRawY() - downPosition[1]);
+                    testChangePos(event.getX() - downPosition[0], event.getY() - downPosition[1]);
                     return;
                 case MotionEvent.ACTION_CANCEL:
                     state = State.IDLE;
@@ -345,8 +347,8 @@ public abstract class ViewGroupGestureRecognizer {
     }
 
     private boolean isBigMove(MotionEvent event) {
-        double a2 = Math.pow(downPosition[0] - (double) event.getRawX(), 2D);
-        double b2 = Math.pow(downPosition[1] - (double) event.getRawY(), 2D);
+        double a2 = Math.pow(downPosition[0] - (double) event.getX(), 2D);
+        double b2 = Math.pow(downPosition[1] - (double) event.getY(), 2D);
         double limit = Math.pow(activity.getResources().getDimension(R.dimen.nine_view_big_move), 2D);
         if (a2 + b2 > limit) {
             return true;
@@ -356,8 +358,8 @@ public abstract class ViewGroupGestureRecognizer {
     }
 
     private boolean isMoving(MotionEvent event) {
-        double a2 = Math.pow(downPosition[0] - (double) event.getRawX(), 2D);
-        double b2 = Math.pow(downPosition[1] - (double) event.getRawY(), 2D);
+        double a2 = Math.pow(downPosition[0] - (double) event.getX(), 2D);
+        double b2 = Math.pow(downPosition[1] - (double) event.getY(), 2D);
         double limit = Math.pow(activity.getResources().getDimension(R.dimen.nine_view_min_bounce), 2D);
         if (a2 + b2 > limit) {
             return true;
@@ -380,8 +382,8 @@ public abstract class ViewGroupGestureRecognizer {
     }
 
     private void setDownPosition(MotionEvent event) {
-        downPosition[0] = (double) event.getRawX();
-        downPosition[1] = (double) event.getRawY();
+        downPosition[0] = (double) event.getX();
+        downPosition[1] = (double) event.getY();
     }
 
     public View pointToTargetView(int x, int y) {
@@ -395,10 +397,10 @@ public abstract class ViewGroupGestureRecognizer {
     }
 
     private void testChangePos(double x, double y) {
-        for (View view : targetViews) {
-            view.setTranslationX(0);
-            view.setTranslationY((float) y);
-        }
-        notifyTouch(x, y);
+        //for (View view : targetViews) {
+        //    view.setTranslationX(0);
+        //    view.setTranslationY((float) y);
+        //}
+        notifyMove(targetView, downPosition[0], downPosition[1], x, y);
     }
 }
