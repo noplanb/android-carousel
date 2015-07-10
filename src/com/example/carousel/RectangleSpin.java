@@ -45,12 +45,14 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
         target.setTranslationY(calculatedOffset[1]);
     }
 
-    private float getInitialPositionX(View v) {
-        return v.getLeft() + v.getWidth() / 2;
+    @Override
+    protected void cancelSpin() {
+
     }
 
-    private float getInitialPositionY(View v) {
-        return v.getTop() + v.getHeight() / 2;
+    @Override
+    protected void initSpin(double startX, double startY, double offsetX, double offsetY) {
+
     }
 
     @Override

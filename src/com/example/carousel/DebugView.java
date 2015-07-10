@@ -51,6 +51,7 @@ public class DebugView extends View {
                     7, ovalPaint);
         }
         canvas.drawText("" + nvGroup.getSpinStrategy().getAngle(), 5, 50, pointPaint);
+        canvas.drawText("" + ((OvalSpin)nvGroup.getSpinStrategy()).angle, 5, 100, pointPaint);
     }
 
     public void setNineViewGroup(NineViewGroup group) {

@@ -26,6 +26,8 @@ public abstract class ViewGroupGestureRecognizer {
 
     public abstract void notifyMove(View target, double startX, double startY, double offsetX, double offsetY);
 
+    public abstract void startMove(double startX, double startY, double offsetX, double offsetY);
+
     // ---------
     // Constants
     // ---------
@@ -181,6 +183,7 @@ public abstract class ViewGroupGestureRecognizer {
                     return;
                 case MotionEvent.ACTION_MOVE:
                     if (isMoving(event)) {
+                        startMove(downPosition[0], downPosition[1], event.getX() - downPosition[0], event.getY() - downPosition[1]);
                         testChangePos(event.getX() - downPosition[0], event.getY() - downPosition[1]);
                         if (longPressTask != null) {
                             longPressTask.cancel();
