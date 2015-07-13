@@ -397,7 +397,7 @@ public class NineViewGroup extends ViewGroup {
         @Override
         public void notifyMove(View target, double startX, double startY, double offsetX, double offsetY) {
             if (spinStrategy != null && !isCenterView(target)) {
-                spinStrategy.spin(target, startX, startY, offsetX, offsetY);
+                spinStrategy.spin(startX, startY, offsetX, offsetY);
             }
             if (gestureCallbacks != null) {
                 gestureCallbacks.notifyUpdateDebug();
@@ -445,7 +445,7 @@ public class NineViewGroup extends ViewGroup {
 
         abstract public double getAngle();
         abstract protected float[] calculate(Box box, double distance);
-        abstract protected void spin(View target, double startX, double startY, double offsetX, double offsetY);
+        abstract protected void spin(double startX, double startY, double offsetX, double offsetY);
         abstract protected void cancelSpin();
         abstract protected void initSpin(double startX, double startY, double offsetX, double offsetY);
 
@@ -456,5 +456,7 @@ public class NineViewGroup extends ViewGroup {
         protected double getInitialPositionY(View v) {
             return v.getTop() + v.getHeight() / 2;
         }
+
+        public abstract void reset();
     }
 }

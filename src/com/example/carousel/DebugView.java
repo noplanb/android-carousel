@@ -43,6 +43,7 @@ public class DebugView extends View {
         setupOval();
         ovalPaint.setStyle(Paint.Style.STROKE);
         canvas.drawRect(ovalRect, ovalPaint);
+        canvas.drawOval(ovalRect, ovalPaint);
         ovalPaint.setStyle(Paint.Style.FILL);
         for (int i = 0; i < 8; i++) {
             View v = nvGroup.getSurroundingFrame(i);
@@ -51,7 +52,6 @@ public class DebugView extends View {
                     7, ovalPaint);
         }
         canvas.drawText("" + nvGroup.getSpinStrategy().getAngle(), 5, 50, pointPaint);
-        canvas.drawText("" + ((OvalSpin)nvGroup.getSpinStrategy()).angle, 5, 100, pointPaint);
     }
 
     public void setNineViewGroup(NineViewGroup group) {
@@ -59,13 +59,12 @@ public class DebugView extends View {
     }
 
     private void setupOval() {
-        View topLeftV = nvGroup.getSurroundingFrame(7);
-        View bottomRightV = nvGroup.getSurroundingFrame(2);
+        OvalSpin spin = (OvalSpin) nvGroup.getSpinStrategy();
         ovalRect.set(
-                topLeftV.getLeft() + topLeftV.getWidth() / 2,
-                topLeftV.getTop() + topLeftV.getHeight() / 2,
-                bottomRightV.getRight() - bottomRightV.getWidth() / 2,
-                bottomRightV.getBottom() - bottomRightV.getHeight() / 2
+                (float) (spin.x0 - spin.b),
+                (float) (spin.y0 - spin.a),
+                (float) (spin.x0 + spin.b),
+                (float) (spin.y0 + spin.a)
         );
     }
 }

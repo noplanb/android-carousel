@@ -7,16 +7,16 @@ import android.view.View;
  */
 public class OvalSpin extends NineViewGroup.SpinStrategy {
 
-    private double x0;
-    private double y0;
+    public double x0;
+    public double y0;
     public double angle;
     private double aX;
     private double aY;
     private double bX;
     private double bY;
-    private double a;
-    private double b;
-    private double c;
+    public double a;
+    public double b;
+    public double c;
 
     public OvalSpin(NineViewGroup viewGroup) {
         super(viewGroup);
@@ -38,8 +38,6 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
     @Override
     protected float[] calculate(NineViewGroup.Box box, double distance) {
         float[] offset = new float[2];
-        //offset[0] = 0;
-        //offset[1] = 0;
         View frame = getViewGroup().getFrame(box);
         double x = getInitialPositionX(frame) - x0;
         double y = getInitialPositionY(frame) - y0;
@@ -50,7 +48,7 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
     }
 
     @Override
-    protected void spin(View target, double startX, double startY, double offsetX, double offsetY) {
+    protected void spin(double startX, double startY, double offsetX, double offsetY) {
         if (getViewGroup() == null || getViewGroup().getChildCount() != 9) {
             return;
         }
@@ -92,11 +90,33 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
         c = y0 - top;
         b = x0 - left;
         a = Math.hypot(b, c);
-        aX = startX - x0;
-        aY = startY - y0;
-        bX = startX + offsetX - x0;
-        bY = startY + offsetY - y0;
-        angle = Math.atan2(top + topLeftView.getTranslationY() - y0, left + topLeftView.getTranslationX() - x0) -
-                Math.atan2(top - y0, left - x0) - getAngle();
+        angle = angle + getAngle();
+    }
+
+    @Override
+    public void reset() {
+        x0 = y0 = 0;
+        angle = 0;
+        aX = aY = bX = bY = 0;
+        a = b = c = 0;
+        for (int i = 0; i < 8; i++) {
+            View v = getViewGroup().getSurroundingFrame(i);
+            v.setTranslationX(0);
+            v.setTranslationY(0);
+        }
+    }
+
+    private double getInitialOffsetX(View v) {
+        double x = getInitialPositionX(v) - x0;
+        double y = getInitialPositionY(v) - y0;
+        double newAngle = Math.atan2(y, x);
+        return (b*Math.cos(newAngle) - x);
+    }
+
+    private double getInitialOffsetY(View v) {
+        double x = getInitialPositionX(v) - x0;
+        double y = getInitialPositionY(v) - y0;
+        double newAngle = Math.atan2(y, x);
+        return (a*Math.sin(newAngle) - y);
     }
 }

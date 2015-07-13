@@ -22,10 +22,11 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
     }
 
     @Override
-    protected void spin(View target, double startX, double startY, double offsetX, double offsetY) {
+    protected void spin(double startX, double startY, double offsetX, double offsetY) {
         if (getViewGroup() == null || getViewGroup().getChildCount() != 9) {
             return;
         }
+        View target = getViewGroup().getFrame(NineViewGroup.Box.CENTER_RIGHT);
         if (offsetX == 0 && offsetY == 0) {
             target.setTranslationY(0);
             target.setTranslationX(0);
@@ -53,6 +54,15 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
     @Override
     protected void initSpin(double startX, double startY, double offsetX, double offsetY) {
 
+    }
+
+    @Override
+    public void reset() {
+        for (int i = 0; i < 8; i++) {
+            View v = getViewGroup().getSurroundingFrame(i);
+            v.setTranslationX(0);
+            v.setTranslationY(0);
+        }
     }
 
     @Override
