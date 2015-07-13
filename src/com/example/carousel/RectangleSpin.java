@@ -17,7 +17,7 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
     }
 
     @Override
-    public double getAngle() {
+    public double calculateAngle() {
         return 0;
     }
 
@@ -41,7 +41,7 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
 
         double distance = Math.abs(offsetX) + Math.abs(offsetY);
         NineViewGroup.Box targetBox = getViewGroup().getBox(target);
-        float[] calculatedOffset = calculate(targetBox, distance);
+        float[] calculatedOffset = calculateOffset(targetBox, distance);
         target.setTranslationX(calculatedOffset[0]);
         target.setTranslationY(calculatedOffset[1]);
     }
@@ -57,6 +57,11 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
     }
 
     @Override
+    protected void finishSpin(double startX, double startY, double offsetX, double offsetY) {
+
+    }
+
+    @Override
     public void reset() {
         for (int i = 0; i < 8; i++) {
             View v = getViewGroup().getSurroundingFrame(i);
@@ -66,7 +71,7 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
     }
 
     @Override
-    protected float[] calculate(NineViewGroup.Box box, double distance) {
+    protected float[] calculateOffset(NineViewGroup.Box box, double distance) {
         double width = right - left;
         double height = bottom - top;
         float[] offset = new float[2];

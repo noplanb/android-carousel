@@ -399,16 +399,26 @@ public class NineViewGroup extends ViewGroup {
             if (spinStrategy != null && !isCenterView(target)) {
                 spinStrategy.spin(startX, startY, offsetX, offsetY);
             }
-            if (gestureCallbacks != null) {
-                gestureCallbacks.notifyUpdateDebug();
+        }
+
+        @Override
+        public void startMove(View target, double startX, double startY, double offsetX, double offsetY) {
+            if (spinStrategy != null && !isCenterView(target)) {
+                spinStrategy.initSpin(startX, startY, offsetX, offsetY);
             }
         }
 
         @Override
-        public void startMove(double startX, double startY, double offsetX, double offsetY) {
+        public void endMove(double startX, double startY, double offsetX, double offsetY) {
             if (spinStrategy != null) {
-                spinStrategy.initSpin(startX, startY, offsetX, offsetY);
+                spinStrategy.finishSpin(startX, startY, offsetX, offsetY);
             }
+        }
+    }
+
+    public void notifyUpdateDebug() {
+        if (gestureCallbacks != null) {
+            gestureCallbacks.notifyUpdateDebug();
         }
     }
 
@@ -434,6 +444,7 @@ public class NineViewGroup extends ViewGroup {
     }
 
     public static abstract class SpinStrategy {
+        protected String TAG = getClass().getSimpleName();
         private NineViewGroup viewGroup;
         public SpinStrategy(NineViewGroup viewGroup) {
             this.viewGroup = viewGroup;
@@ -443,11 +454,12 @@ public class NineViewGroup extends ViewGroup {
             return viewGroup;
         }
 
-        abstract public double getAngle();
-        abstract protected float[] calculate(Box box, double distance);
+        abstract public double calculateAngle();
+        abstract protected float[] calculateOffset(Box box, double distance);
         abstract protected void spin(double startX, double startY, double offsetX, double offsetY);
         abstract protected void cancelSpin();
         abstract protected void initSpin(double startX, double startY, double offsetX, double offsetY);
+        abstract protected void finishSpin(double startX, double startY, double offsetX, double offsetY);
 
         protected double getInitialPositionX(View v) {
             return v.getLeft() + v.getWidth() / 2;
