@@ -231,6 +231,6 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
     private double getDistanceFromInitial(View target, View initialView) {
         double tX = getInitialPositionX(target) + target.getTranslationX();
         double tY = getInitialPositionY(target) + target.getTranslationY();
-        return Math.hypot(tX - getInitialPositionX(initialView), tY - getInitialPositionX(initialView));
+        return Math.hypot(tX - getInitialPositionX(initialView), tY - getInitialPositionY(initialView));
     }
 }
