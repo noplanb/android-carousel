@@ -489,5 +489,18 @@ public class NineViewGroup extends ViewGroup {
         }
 
         public abstract void reset();
+
+        public static double normalizedAngle(double angle) {
+            while (true) {
+                if (angle >= Math.PI) {
+                    angle -= 2 * Math.PI;
+                } else if (angle < -Math.PI) {
+                    angle += 2 * Math.PI;
+                } else {
+                    break;
+                }
+            }
+            return angle;
+        }
     }
 }

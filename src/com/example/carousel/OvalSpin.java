@@ -2,6 +2,7 @@ package com.example.carousel;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
@@ -28,6 +29,8 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
     private double currentAngle;
     private double previousAngle;
     private long lastTime;
+    private long previousLastTime;
+    private long animationLastTime;
     private ValueAnimator valueAnimator;
 
     public OvalSpin(NineViewGroup viewGroup) {
@@ -78,6 +81,7 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
         }
         previousAngle = currentAngle;
         currentAngle = angle;
+        previousLastTime = lastTime;
         lastTime = System.nanoTime();
         getViewGroup().notifyUpdateDebug();
     }
@@ -103,7 +107,9 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
         c = y0 - top;
         b = x0 - left;
         a = Math.hypot(b, c);
-        angle = angle + currentAngle;
+        angle = normalizedAngle(angle + currentAngle);
+        previousAngle = currentAngle = 0;
+        Log.i(TAG, "Inited: c: " + currentAngle + " p: " + previousAngle + " a: " + angle);
         isInited = true;
     }
 
@@ -112,16 +118,19 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
         if (!isInited) {
             return;
         }
-        final double angleDiff = normalizedAngle(currentAngle - previousAngle);
+        final double angleDiff = normalizedAngle(currentAngle - previousAngle) / Math.abs(lastTime - previousLastTime);
         valueAnimator = new ValueAnimator();
-        final float startAnimValue = (float) Math.hypot(offsetX, offsetY);
+        final float startAnimValue = (float) angleDiff;
+        animationLastTime = System.nanoTime();
         valueAnimator.setFloatValues(startAnimValue, 0f);
-        valueAnimator.setDuration(Math.max((long) (3000 * Math.abs(angleDiff)), 200));
+        valueAnimator.setDuration(Math.min(Math.max((long) (200000000000.0 * Math.abs(angleDiff)), 200), 2000));
         valueAnimator.setInterpolator(new DecelerateInterpolator());
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                applySpin(normalizedAngle(angleDiff * ((Float) animation.getAnimatedValue()) / startAnimValue + currentAngle));
+                long time = animationLastTime;
+                animationLastTime = System.nanoTime();
+                applySpin(normalizedAngle(((Float) animation.getAnimatedValue() * Math.abs(animationLastTime - time)) + currentAngle));
             }
         });
         valueAnimator.addListener(new Animator.AnimatorListener() {
@@ -129,7 +138,6 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
 
             @Override
             public void onAnimationStart(Animator animation) {
-
             }
 
             @Override
@@ -157,7 +165,7 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
     @Override
     public void reset() {
         x0 = y0 = 0;
-        angle = 0;
+        angle = previousAngle = currentAngle = 0;
         aX = aY = bX = bY = 0;
         a = b = c = 0;
         isAnimating = false;
@@ -184,19 +192,6 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
         double y = getInitialPositionY(v) - y0;
         double newAngle = Math.atan2(y, x);
         return (a*Math.sin(newAngle) - y);
-    }
-
-    private double normalizedAngle(double angle) {
-        while (true) {
-            if (angle >= Math.PI) {
-                angle -= 2 * Math.PI;
-            } else if (angle < -Math.PI) {
-                angle += 2 * Math.PI;
-            } else {
-                break;
-            }
-        }
-        return angle;
     }
 
     private void runAllocationAnimation() {

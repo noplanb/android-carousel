@@ -59,12 +59,18 @@ public class DebugView extends View {
     }
 
     private void setupOval() {
-        OvalSpin spin = (OvalSpin) nvGroup.getSpinStrategy();
-        ovalRect.set(
-                (float) (spin.x0 - spin.b),
-                (float) (spin.y0 - spin.a),
-                (float) (spin.x0 + spin.b),
-                (float) (spin.y0 + spin.a)
-        );
+        if (nvGroup.getSpinStrategy() instanceof OvalSpin) {
+            OvalSpin spin = (OvalSpin) nvGroup.getSpinStrategy();
+            ovalRect.set(
+                    (float) (spin.x0 - spin.b),
+                    (float) (spin.y0 - spin.a),
+                    (float) (spin.x0 + spin.b),
+                    (float) (spin.y0 + spin.a)
+            );
+        }
+        if (nvGroup.getSpinStrategy() instanceof RectangleSpin) {
+            RectangleSpin spin = (RectangleSpin) nvGroup.getSpinStrategy();
+            ovalRect.set(spin.left, spin.top, spin.right, spin.bottom);
+        }
     }
 }
