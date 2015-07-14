@@ -5,6 +5,9 @@ import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by skamenkovych@codeminders.com on 7/9/2015.
  */
@@ -134,6 +137,7 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
                 if (!isCancelled) {
                     isInited = false;
                 }
+                runAllocationAnimation();
             }
 
             @Override
@@ -159,7 +163,7 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
         isAnimating = false;
         isInited = false;
         if (valueAnimator != null) {
-            valueAnimator.end();
+            valueAnimator.cancel();
         }
         for (int i = 0; i < 8; i++) {
             View v = getViewGroup().getSurroundingFrame(i);
@@ -193,5 +197,40 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
             }
         }
         return angle;
+    }
+
+    private void runAllocationAnimation() {
+        List<NineViewGroup.Box> placements = new ArrayList<>();
+        List<View> unlocated = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            placements.add(NineViewGroup.Box.getByOrdinal(i));
+            unlocated.add(getViewGroup().getSurroundingFrame(i));
+        }
+        NineViewGroup.Box placementBox = NineViewGroup.Box.getByOrdinal(0);
+        View placementView = getViewGroup().getFrame(placementBox);
+        double distance = Math.hypot(x0 * 2, y0 * 2);
+        View movingView = null;
+        for (View view : unlocated) {
+            double currentDistance = getDistanceFromInitial(view, placementView);
+            if (Double.compare(currentDistance, distance) < 0) {
+                movingView = view;
+                distance = currentDistance;
+            }
+        }
+        movingView.setTranslationX(placementView.getLeft() - movingView.getLeft());
+        movingView.setTranslationY(placementView.getTop() - movingView.getTop());
+
+        for (int i = 1; i < 8; i++) {
+            placementView = getViewGroup().getFrame(NineViewGroup.Box.getByOrdinal(i));
+            movingView = getViewGroup().getFrame(getViewGroup().getBox(movingView).getNext());
+            movingView.setTranslationX(placementView.getLeft() - movingView.getLeft());
+            movingView.setTranslationY(placementView.getTop() - movingView.getTop());
+        }
+    }
+
+    private double getDistanceFromInitial(View target, View initialView) {
+        double tX = getInitialPositionX(target) + target.getTranslationX();
+        double tY = getInitialPositionY(target) + target.getTranslationY();
+        return Math.hypot(tX - getInitialPositionX(initialView), tY - getInitialPositionX(initialView));
     }
 }

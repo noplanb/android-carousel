@@ -67,23 +67,29 @@ public class NineViewGroup extends ViewGroup {
     }
 
     public enum Box {
-        TOP_LEFT(7),
-        TOP_CENTER(6),
-        TOP_RIGHT(4),
-        CENTER_LEFT(5),
-        CENTER(8),
-        CENTER_RIGHT(0),
-        BOTTOM_LEFT(3),
-        BOTTOM_CENTER(1),
-        BOTTOM_RIGHT(2);
+        TOP_LEFT(7, 0),
+        TOP_CENTER(6, 1),
+        TOP_RIGHT(4, 2),
+        CENTER_LEFT(5, 7),
+        CENTER(8, 8),
+        CENTER_RIGHT(0, 3),
+        BOTTOM_LEFT(3, 6),
+        BOTTOM_CENTER(1, 5),
+        BOTTOM_RIGHT(2, 4);
 
         private int pos;
-        Box(int i) {
+        private int ordinal;
+        Box(int i, int order) {
             pos = i;
+            ordinal = order;
         }
 
         int getPos() {
             return pos;
+        }
+
+        public int getOrdinal() {
+            return ordinal;
         }
 
         public static Box getBox(int position) {
@@ -93,6 +99,19 @@ public class NineViewGroup extends ViewGroup {
                 }
             }
             return null;
+        }
+
+        public static Box getByOrdinal(int ordinal) {
+            for (Box box : values()) {
+                if (box.ordinal == ordinal) {
+                    return box;
+                }
+            }
+            return null;
+        }
+
+        public Box getNext() {
+            return getByOrdinal((ordinal + 1) % 8);
         }
     }
     //-------------
@@ -439,7 +458,7 @@ public class NineViewGroup extends ViewGroup {
         tv.setLayoutParams(p);
         tv.setTextColor(Color.YELLOW);
         tv.setTextSize(26f);
-        tv.setText(String.valueOf(fl.getId()));
+        tv.setText(String.valueOf(Box.getBox(positionWithIndex(fl.getId())).getOrdinal()));
         fl.addView(tv);
     }
 
