@@ -445,6 +445,11 @@ public class NineViewGroup extends ViewGroup {
         public boolean isSliding() {
             return spinStrategy != null && spinStrategy.isSpinning();
         }
+
+        @Override
+        public boolean isSlidingSupported() {
+            return spinStrategy != null;
+        }
     }
 
     public void notifyUpdateDebug() {

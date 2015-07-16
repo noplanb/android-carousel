@@ -51,7 +51,9 @@ public class DebugView extends View {
                     v.getTop() + v.getHeight()/2 + v.getTranslationY(),
                     7, ovalPaint);
         }
-        canvas.drawText("" + nvGroup.getSpinStrategy().calculateAngle(), 5, 50, pointPaint);
+        if (nvGroup.getSpinStrategy() != null) {
+            canvas.drawText("" + nvGroup.getSpinStrategy().calculateAngle(), 5, 50, pointPaint);
+        }
     }
 
     public void setNineViewGroup(NineViewGroup group) {

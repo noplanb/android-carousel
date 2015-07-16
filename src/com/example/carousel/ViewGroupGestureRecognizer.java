@@ -34,6 +34,8 @@ public abstract class ViewGroupGestureRecognizer {
 
     public abstract boolean isSliding();
 
+    public abstract boolean isSlidingSupported();
+
     // ---------
     // Constants
     // ---------
@@ -193,7 +195,7 @@ public abstract class ViewGroupGestureRecognizer {
                     // Happens when the backing window view gets the down event. Just ignore.
                     return;
                 case MotionEvent.ACTION_MOVE:
-                    if (isMoving(event)) {
+                    if (isSlidingSupported() && isMoving(event)) {
                         startMove(targetView, downPosition[0], downPosition[1], event.getX() - downPosition[0], event.getY() - downPosition[1]);
                         move(targetView, event.getX() - downPosition[0], event.getY() - downPosition[1]);
                         if (longPressTask != null) {

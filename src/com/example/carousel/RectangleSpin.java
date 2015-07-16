@@ -181,7 +181,7 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
 
     @Override
     public void reset() {
-        previousAngle = currentAngle = 0;
+        angle = previousAngle = currentAngle = 0;
         isAnimating = false;
         isInited = false;
         if (valueAnimator != null) {
