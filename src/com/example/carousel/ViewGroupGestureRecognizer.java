@@ -30,6 +30,10 @@ public abstract class ViewGroupGestureRecognizer {
 
     public abstract void endMove(double startX, double startY, double offsetX, double offsetY);
 
+    public abstract void onTouch(double startX, double startY);
+
+    public abstract boolean isSliding();
+
     // ---------
     // Constants
     // ---------
@@ -154,8 +158,13 @@ public abstract class ViewGroupGestureRecognizer {
                     int x = (int) event.getX();
                     int y = (int) event.getY();
                     targetView = pointToTargetView(x, y);
-                    state = State.DOWN;
                     setDownPosition(event);
+                    if (isSliding()) {
+                        state = State.SLIDING;
+                        onTouch(downPosition[0], downPosition[1]);
+                        break;
+                    }
+                    state = State.DOWN;
                     if (targetView != null) {
                         startLongpressTimer();
                     }

@@ -2,7 +2,6 @@ package com.example.carousel;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
@@ -72,6 +71,13 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
         applySpin(calculateAngle());
     }
 
+    @Override
+    protected void stopSpin(double startX, double startY) {
+        if (valueAnimator != null && isAnimating) {
+            valueAnimator.cancel();
+        }
+    }
+
     private void applySpin(double angle) {
         for (int i = 0; i < 8; i++) {
             View v = getViewGroup().getSurroundingFrame(i);
@@ -109,7 +115,6 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
         a = Math.hypot(b, c);
         angle = normalizedAngle(angle + currentAngle);
         previousAngle = currentAngle = 0;
-        Log.i(TAG, "Inited: c: " + currentAngle + " p: " + previousAngle + " a: " + angle);
         isInited = true;
     }
 
@@ -160,6 +165,11 @@ public class OvalSpin extends NineViewGroup.SpinStrategy {
         });
         valueAnimator.start();
         isAnimating = true;
+    }
+
+    @Override
+    protected boolean isSpinning() {
+        return isInited;
     }
 
     @Override

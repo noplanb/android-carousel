@@ -433,6 +433,18 @@ public class NineViewGroup extends ViewGroup {
                 spinStrategy.finishSpin(startX, startY, offsetX, offsetY);
             }
         }
+
+        @Override
+        public void onTouch(double startX, double startY) {
+            if (spinStrategy != null) {
+                spinStrategy.stopSpin(startX, startY);
+            }
+        }
+
+        @Override
+        public boolean isSliding() {
+            return spinStrategy != null && spinStrategy.isSpinning();
+        }
     }
 
     public void notifyUpdateDebug() {
@@ -476,9 +488,11 @@ public class NineViewGroup extends ViewGroup {
         abstract public double calculateAngle();
         abstract protected float[] calculateOffset(Box box, double distance);
         abstract protected void spin(double startX, double startY, double offsetX, double offsetY);
+        abstract protected void stopSpin(double startX, double startY);
         abstract protected void cancelSpin();
         abstract protected void initSpin(double startX, double startY, double offsetX, double offsetY);
         abstract protected void finishSpin(double startX, double startY, double offsetX, double offsetY);
+        abstract protected boolean isSpinning();
 
         protected double getInitialPositionX(View v) {
             return v.getLeft() + v.getWidth() / 2;
