@@ -45,6 +45,7 @@ public class NineViewGroup extends ViewGroup {
     private SpinStrategy spinStrategy;
     private ViewGroupGestureRecognizer vgGestureRecognizer;
     private LayoutCompleteListener layoutCompleteListener;
+    private int spinOffset;
 
     public interface GestureCallbacks {
         boolean onSurroundingClick(View view, int position);
@@ -78,18 +79,18 @@ public class NineViewGroup extends ViewGroup {
         BOTTOM_RIGHT(2, 4);
 
         private int pos;
-        private int ordinal;
+        private int spinOrder;
         Box(int i, int order) {
             pos = i;
-            ordinal = order;
+            spinOrder = order;
         }
 
         int getPos() {
             return pos;
         }
 
-        public int getOrdinal() {
-            return ordinal;
+        public int getSpinOrder() {
+            return spinOrder;
         }
 
         public static Box getBox(int position) {
@@ -103,7 +104,7 @@ public class NineViewGroup extends ViewGroup {
 
         public static Box getByOrdinal(int ordinal) {
             for (Box box : values()) {
-                if (box.ordinal == ordinal) {
+                if (box.spinOrder == ordinal) {
                     return box;
                 }
             }
@@ -111,8 +112,19 @@ public class NineViewGroup extends ViewGroup {
         }
 
         public Box getNext() {
-            return getByOrdinal((ordinal + 1) % 8);
+            if (this == CENTER) {
+                return this;
+            }
+            return getByOrdinal((spinOrder + 1) % 8);
         }
+
+        public Box getWithOffset(int offset) {
+            if (this == CENTER) {
+                return this;
+            }
+            return getByOrdinal((spinOrder + offset + 8) % 8);
+        }
+
     }
     //-------------
     // Constructors
@@ -178,6 +190,7 @@ public class NineViewGroup extends ViewGroup {
             fl.setClipChildren(false);
             fl.setClipToPadding(false);
             fl.setId(i);
+            fl.setTag(R.id.box_key, Box.values()[i].getSpinOrder());
             setupTestView(fl);// FIXME remove
             addView(fl, i, new LayoutParams(elementWidth(), elementHeight()));
         }
@@ -318,6 +331,32 @@ public class NineViewGroup extends ViewGroup {
             default:
                 throw new RuntimeException("Illegal position passed to getSurroundedView");
         }
+    }
+
+    public void setSpinOffset(Box box, FrameLayout view) {
+        int curPos = Box.getBox(positionWithIndex(view.getId())).getSpinOrder();
+        int newPos = box.getSpinOrder();
+        setSpinOffset((8 - curPos + newPos) % 8);
+    }
+
+    /**
+     *
+     * @param offset value in between the range [0; 7]
+     */
+    public void setSpinOffset(int offset) {
+        spinOffset = (spinOffset + offset) % 8;
+        ArrayList<View> views = getNineViews();
+        removeAllViewsInLayout();
+        for (int i = 0; i < 9; i++) {
+            int oldId = Box.values()[i].getWithOffset(-offset).ordinal();
+            views.get(oldId).setId(i);
+            setupTestView((FrameLayout) views.get(oldId));
+            addView(views.get(oldId), i);
+        }
+    }
+
+    public int getSpinOffset() {
+        return spinOffset;
     }
 
     //---------------------------
@@ -466,17 +505,34 @@ public class NineViewGroup extends ViewGroup {
 
     @SuppressWarnings("ResourceType")
     private void setupTestView(FrameLayout fl) {
+        fl.removeAllViews();
         fl.setBackgroundResource(R.drawable.box_background);
         if (isCenterView(fl)) {
             fl.setSelected(true);
+        } else {
+            fl.setSelected(false);
         }
-        TextView tv = new TextView(getContext());
+        TextView tvData = new TextView(getContext());
         FrameLayout.LayoutParams p = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER);
-        tv.setLayoutParams(p);
-        tv.setTextColor(Color.YELLOW);
-        tv.setTextSize(26f);
-        tv.setText(String.valueOf(Box.getBox(positionWithIndex(fl.getId())).getOrdinal()));
-        fl.addView(tv);
+        tvData.setLayoutParams(p);
+        tvData.setTextColor(Color.YELLOW);
+        tvData.setTextSize(26f);
+        tvData.setText(String.valueOf(fl.getTag(R.id.box_key)));
+        fl.addView(tvData);
+        TextView tvPos = new TextView(getContext());
+        p = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.TOP);
+        tvPos.setLayoutParams(p);
+        tvPos.setTextColor(Color.WHITE);
+        tvPos.setTextSize(16f);
+        tvPos.setText("Pos: " + String.valueOf(positionWithIndex(fl.getId())));
+        fl.addView(tvPos);
+        TextView tvId = new TextView(getContext());
+        p = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
+        tvId.setLayoutParams(p);
+        tvId.setTextColor(Color.WHITE);
+        tvId.setTextSize(16f);
+        tvId.setText("Id: " + fl.getId());
+        fl.addView(tvId);
     }
 
     public static abstract class SpinStrategy {

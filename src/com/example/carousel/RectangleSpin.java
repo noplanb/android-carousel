@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -152,31 +153,33 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
 
     private void runAllocationAnimation() {
         List<NineViewGroup.Box> placements = new ArrayList<>();
-        List<View> unlocated = new ArrayList<>();
+        List<FrameLayout> unlocated = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
             placements.add(NineViewGroup.Box.getByOrdinal(i));
             unlocated.add(getViewGroup().getSurroundingFrame(i));
         }
-        NineViewGroup.Box placementBox = NineViewGroup.Box.getByOrdinal(0);
-        View placementView = getViewGroup().getFrame(placementBox);
+        NineViewGroup.Box startPlacementBox = NineViewGroup.Box.TOP_LEFT;
+        FrameLayout placementView = getViewGroup().getFrame(startPlacementBox);
         double distance = Math.hypot(x0 * 2, y0 * 2);
-        View movingView = null;
-        for (View view : unlocated) {
+        FrameLayout movingView = null;
+        for (FrameLayout view : unlocated) {
             double currentDistance = getDistanceFromInitial(view, placementView);
             if (Double.compare(currentDistance, distance) < 0) {
                 movingView = view;
                 distance = currentDistance;
             }
         }
-        movingView.setTranslationX(placementView.getLeft() - movingView.getLeft());
-        movingView.setTranslationY(placementView.getTop() - movingView.getTop());
-
-        for (int i = 1; i < 8; i++) {
-            placementView = getViewGroup().getFrame(NineViewGroup.Box.getByOrdinal(i));
-            movingView = getViewGroup().getFrame(getViewGroup().getBox(movingView).getNext());
-            movingView.setTranslationX(placementView.getLeft() - movingView.getLeft());
-            movingView.setTranslationY(placementView.getTop() - movingView.getTop());
-        }
+        //movingView.setTranslationX(placementView.getLeft() - movingView.getLeft());
+        //movingView.setTranslationY(placementView.getTop() - movingView.getTop());
+        //FrameLayout startMovingView = movingView;
+        //for (int i = 1; i < 8; i++) {
+        //    placementView = getViewGroup().getFrame(NineViewGroup.Box.getByOrdinal(i));
+        //    movingView = getViewGroup().getFrame(getViewGroup().getBox(movingView).getNext());
+        //    movingView.setTranslationX(placementView.getLeft() - movingView.getLeft());
+        //    movingView.setTranslationY(placementView.getTop() - movingView.getTop());
+        //}
+        reset();
+        getViewGroup().setSpinOffset(startPlacementBox, movingView);
     }
 
     @Override

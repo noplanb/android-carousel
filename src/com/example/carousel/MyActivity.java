@@ -55,6 +55,7 @@ public class MyActivity extends Activity {
             public boolean onCenterClick(View view) {
                 showToast("onCenterClick");
                 nvGroup.getSpinStrategy().reset();
+                nvGroup.setSpinOffset(-nvGroup.getSpinOffset());
                 notifyUpdateDebug();
                 return true;
             }

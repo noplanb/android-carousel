@@ -41,16 +41,16 @@ public class DebugView extends View {
             return;
         }
         setupOval();
-        ovalPaint.setStyle(Paint.Style.STROKE);
-        canvas.drawRect(ovalRect, ovalPaint);
-        canvas.drawOval(ovalRect, ovalPaint);
+        //ovalPaint.setStyle(Paint.Style.STROKE);
+        //canvas.drawRect(ovalRect, ovalPaint);
+        //canvas.drawOval(ovalRect, ovalPaint);
         ovalPaint.setStyle(Paint.Style.FILL);
-        for (int i = 0; i < 8; i++) {
-            View v = nvGroup.getSurroundingFrame(i);
-            canvas.drawCircle(v.getLeft() + v.getWidth()/2 + v.getTranslationX(),
-                    v.getTop() + v.getHeight()/2 + v.getTranslationY(),
-                    7, ovalPaint);
-        }
+        //for (int i = 0; i < 8; i++) {
+        //    View v = nvGroup.getSurroundingFrame(i);
+        //    canvas.drawCircle(v.getLeft() + v.getWidth()/2 + v.getTranslationX(),
+        //            v.getTop() + v.getHeight()/2 + v.getTranslationY(),
+        //            7, ovalPaint);
+        //}
         if (nvGroup.getSpinStrategy() != null) {
             canvas.drawText("" + nvGroup.getSpinStrategy().calculateAngle(), 5, 50, pointPaint);
         }
