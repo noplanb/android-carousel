@@ -35,6 +35,8 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
     private ValueAnimator valueAnimator;
     private double topLeftAngle;
     private double topRightAngle;
+    private int width;
+    private int height;
 
     public RectangleSpin(NineViewGroup viewGroup) {
         super(viewGroup);
@@ -90,10 +92,12 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
         top = topLeftView.getTop() + topLeftView.getHeight() / 2;
         right = bottomRightView.getLeft() + bottomRightView.getWidth() / 2;
         bottom = bottomRightView.getTop() + bottomRightView.getHeight() / 2;
+        width = right - left;
+        height = bottom - top;
         angle = normalizedAngle(angle + currentAngle);
         previousAngle = currentAngle = 0;
-        topLeftAngle = Math.atan2(top - y0, left - x0);
-        topRightAngle = Math.atan2(top - y0, right - x0);
+        topLeftAngle = NineViewGroup.Box.TOP_LEFT.getInitialAngle();
+        topRightAngle = NineViewGroup.Box.TOP_RIGHT.getInitialAngle();
         isInited = true;
     }
 
@@ -203,25 +207,25 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
         View frame = getViewGroup().getFrame(box);
         double x = getInitialPositionX(frame) - x0;
         double y = getInitialPositionY(frame) - y0;
-        double newAngle = normalizedAngle(Math.atan2(y, x) + distance + angle);
+        double newAngle = normalizedAngle(box.getInitialAngle() + distance + angle);
 
         double newX, newY;
         if (newAngle <= -topRightAngle && newAngle > topRightAngle) {
             // right line
             newX = (right - x0);
-            newY = newX*Math.tan(newAngle);
+            newY = newX*Math.tan(newAngle) * height / width;
         } else if (newAngle <= topRightAngle && newAngle > topLeftAngle) {
             // top line
             newY = (top - y0);
-            newX = newY/Math.tan(newAngle);
+            newX = newY/Math.tan(newAngle) * width / height;
         } else if (newAngle <= -topLeftAngle && newAngle > -topRightAngle) {
             // bottom line
             newY = (bottom - y0);
-            newX = newY/Math.tan(newAngle);
+            newX = newY/Math.tan(newAngle) * width / height;
         } else {
             // left line
             newX = (left - x0);
-            newY = newX*Math.tan(newAngle);
+            newY = newX*Math.tan(newAngle) * height / width;
         }
         offset[0] = (float) (newX - x);
         offset[1] = (float) (newY - y);

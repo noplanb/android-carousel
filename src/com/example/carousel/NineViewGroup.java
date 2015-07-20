@@ -68,21 +68,23 @@ public class NineViewGroup extends ViewGroup {
     }
 
     public enum Box {
-        TOP_LEFT(7, 0),
-        TOP_CENTER(6, 1),
-        TOP_RIGHT(4, 2),
-        CENTER_LEFT(5, 7),
-        CENTER(8, 8),
-        CENTER_RIGHT(0, 3),
-        BOTTOM_LEFT(3, 6),
-        BOTTOM_CENTER(1, 5),
-        BOTTOM_RIGHT(2, 4);
+        TOP_LEFT(7, 0, -Math.PI*3/4),
+        TOP_CENTER(6, 1, -Math.PI/2),
+        TOP_RIGHT(4, 2, -Math.PI/4),
+        CENTER_LEFT(5, 7, -Math.PI),
+        CENTER(8, 8, 0),
+        CENTER_RIGHT(0, 3, 0),
+        BOTTOM_LEFT(3, 6, Math.PI*3/4),
+        BOTTOM_CENTER(1, 5, Math.PI/2),
+        BOTTOM_RIGHT(2, 4, Math.PI/4);
 
         private int pos;
         private int spinOrder;
-        Box(int i, int order) {
+        private double initialAngle;
+        Box(int i, int order, double angle) {
             pos = i;
             spinOrder = order;
+            initialAngle = angle;
         }
 
         int getPos() {
@@ -125,6 +127,9 @@ public class NineViewGroup extends ViewGroup {
             return getByOrdinal((spinOrder + offset + 8) % 8);
         }
 
+        public double getInitialAngle() {
+            return initialAngle;
+        }
     }
     //-------------
     // Constructors
