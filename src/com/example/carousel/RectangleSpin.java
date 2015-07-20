@@ -3,6 +3,7 @@ package com.example.carousel;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
@@ -107,23 +108,33 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
             return;
         }
         final double angleDiff = normalizedAngle(currentAngle - previousAngle) / Math.abs(lastTime - previousLastTime);
+        long duration = Math.min(Math.max((long) (200000000000.0 * Math.abs(angleDiff)), 200), 2000);
+        double maxDistance = Math.abs(angleDiff * duration) * 333333;
+        final double maxEndAngle = angle + currentAngle + Math.copySign(maxDistance, angleDiff);
+        double quarter = Math.PI / 4;
+        final double normEndAngle = Math.copySign(Math.round(Math.abs(maxEndAngle / quarter)), maxEndAngle) * quarter;
+
+        final long parkingDuration = (long) (duration * Math.abs(normEndAngle - maxEndAngle) / maxDistance);
         valueAnimator = new ValueAnimator();
-        final float startAnimValue = (float) angleDiff;
         animationLastTime = System.nanoTime();
-        valueAnimator.setFloatValues(startAnimValue, 0f);
-        valueAnimator.setDuration(Math.min(Math.max((long) (200000000000.0 * Math.abs(angleDiff)), 200), 2000));
+        valueAnimator.setValues();
+        if (normEndAngle != 0) {
+            valueAnimator.setFloatValues((float) currentAngle, (float) (normEndAngle - angle));
+        } else {
+            valueAnimator.setFloatValues((float) currentAngle, (float) (maxEndAngle - angle));
+        }
+        valueAnimator.setDuration(duration);
         valueAnimator.setInterpolator(new DecelerateInterpolator());
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 long time = animationLastTime;
                 animationLastTime = System.nanoTime();
-                applySpin(normalizedAngle(((Float) animation.getAnimatedValue() * Math.abs(animationLastTime - time)) + currentAngle));
+                applySpin(normalizedAngle((Float) animation.getAnimatedValue()));
             }
         });
         valueAnimator.addListener(new Animator.AnimatorListener() {
             boolean isCancelled;
-
             @Override
             public void onAnimationStart(Animator animation) {
             }
@@ -131,7 +142,16 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (!isCancelled) {
-                    isInited = false;
+                    if (isInited) {
+                        isInited = false;
+                        if (normEndAngle == 0) {
+                            valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+                            valueAnimator.setFloatValues((float) currentAngle, (float) (normEndAngle - angle));
+                            valueAnimator.setDuration(Math.min(parkingDuration, 150));
+                            valueAnimator.start();
+                            return;
+                        }
+                    }
                     runAllocationAnimation();
                 }
             }
@@ -143,7 +163,6 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
 
             @Override
             public void onAnimationRepeat(Animator animation) {
-
             }
         });
         valueAnimator.start();
@@ -173,15 +192,6 @@ public class RectangleSpin extends NineViewGroup.SpinStrategy {
                 distance = currentDistance;
             }
         }
-        //movingView.setTranslationX(placementView.getLeft() - movingView.getLeft());
-        //movingView.setTranslationY(placementView.getTop() - movingView.getTop());
-        //FrameLayout startMovingView = movingView;
-        //for (int i = 1; i < 8; i++) {
-        //    placementView = getViewGroup().getFrame(NineViewGroup.Box.getByOrdinal(i));
-        //    movingView = getViewGroup().getFrame(getViewGroup().getBox(movingView).getNext());
-        //    movingView.setTranslationX(placementView.getLeft() - movingView.getLeft());
-        //    movingView.setTranslationY(placementView.getTop() - movingView.getTop());
-        //}
         reset();
         getViewGroup().setSpinOffset(startPlacementBox, movingView);
     }
